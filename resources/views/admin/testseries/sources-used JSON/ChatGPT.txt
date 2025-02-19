@@ -1,0 +1,901 @@
+I see! You want to allow students to have multiple records for different subjects (like Indian Polity, Economics, Geography, etc.), but at the same time, you're asking if there's a way to store all of this information in **one record** for each student, where a student could have multiple subjects and corresponding source materials in a more flexible and scalable way.
+
+### Solution 1: **Store Multiple Subjects in a JSON or Array Field**
+
+Instead of creating a record for each subject separately (i.e., multiple rows per student), you can store all the subjects and their source materials in a **single record** using a JSON or array format.
+
+Laravel's database supports **JSON columns** (in MySQL, PostgreSQL, etc.) which allow you to store structured data such as arrays or objects in a single column.
+
+### Key Considerations:
+- **Single Record per Student**: Each student will only have one row in the table.
+- **Multiple Subjects**: You can store the subjects and source materials for a student in a JSON format in one column.
+- **Scalability**: You can easily add or remove subjects without needing to modify the database structure or add extra records.
+
+### Approach: Store Subjects and Source Materials as JSON
+
+#### 1. **Database Migration:**
+
+You would store all the subjects and source materials in a `json` column. Here's how you can define the table schema:
+
+```php
+Schema::create('sources_useds', function (Blueprint $table) {
+    $table->id(); // SourceID
+    $table->foreignId('student_id')->constrained('students')->onDelete('cascade');
+    $table->json('subjects_materials'); // This will hold subjects and their source materials
+    $table->timestamps();
+    $table->softDeletes();
+});
+```
+
+- **`subjects_materials`**: This column will store the subjects and their source materials as a JSON object. For example, it could look like this:
+
+```json
+{
+    "Indian Polity": "Study Material 1",
+    "Economics": "Study Material 2",
+    "Geography": "Study Material 3"
+}
+```
+
+#### 2. **Controller Logic (Validation and Storing JSON Data):**
+
+In your controller, you can validate and store the subject data in the `subjects_materials` field as a JSON object. 
+
+##### `store` Method in Controller:
+
+```php
+public function store(Request $request)
+{
+    try {
+        // Validate the request data
+        $validated = $request->validate([
+            'student_id' => 'required|exists:students,id',
+            'subjects_materials' => 'required|array', // Expecting an array of subjects with materials
+            'subjects_materials.*.subject' => 'required|string',
+            'subjects_materials.*.source_material' => 'required|string',
+        ]);
+
+        // Store the subjects and source materials as JSON
+        $studentId = $validated['student_id'];
+        $subjectsMaterials = $validated['subjects_materials'];
+
+        // Prepare the subjects_materials array for storage
+        $subjects = [];
+        foreach ($subjectsMaterials as $item) {
+            $subjects[$item['subject']] = $item['source_material'];
+        }
+
+        // Create a new record for the student with subjects and source materials
+        SourceUsed::create([
+            'student_id' => $studentId,
+            'subjects_materials' => json_encode($subjects), // Store as JSON
+        ]);
+
+        return redirect()->route('sources-used.index')->with('success', 'Source materials added successfully.');
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        // Handle validation exceptions
+        return redirect()->back()->withErrors($e->errors())->withInput();
+    } catch (\Exception $e) {
+        // Log any other exceptions
+        Log::error('Error storing source used: ' . $e->getMessage());
+        return redirect()->route('sources-used.index')->with('error', 'Failed to add source materials. Please try again later.');
+    }
+}
+```
+
+- The **`subjects_materials`** field in the form will be an array of subjects and their corresponding source materials. You can dynamically add as many subjects as needed.
+- **Validation** ensures that each subject has a corresponding source material and that it's valid.
+
+#### 3. **Form to Input Multiple Subjects:**
+
+Here’s how the form can look in `create.blade.php` to allow input for multiple subjects:
+
+```php
+@extends('layouts.app')
+
+@section('content')
+<div class="container">
+    <h1>Add Source Materials for Student</h1>
+
+    <form method="POST" action="{{ route('sources-used.store') }}">
+        @csrf
+
+        <div class="form-group">
+            <label for="student_id">Student</label>
+            <select name="student_id" class="form-control @error('student_id') is-invalid @enderror" required>
+                <option value="">Select Student</option>
+                @foreach($students as $student)
+                    <option value="{{ $student->id }}" {{ old('student_id') == $student->id ? 'selected' : '' }}>
+                        {{ $student->name }}
+                    </option>
+                @endforeach
+            </select>
+            @error('student_id') 
+                <div class="invalid-feedback">{{ $message }}</div> 
+            @enderror
+        </div>
+
+        <div class="form-group" id="subjects-section">
+            <label for="subjects">Subjects and Materials</label>
+
+            <!-- Dynamic form fields for subjects and source materials -->
+            <div class="subject-material">
+                <div class="form-row">
+                    <div class="col">
+                        <input type="text" name="subjects_materials[0][subject]" class="form-control" placeholder="Subject Name" required>
+                    </div>
+                    <div class="col">
+                        <input type="text" name="subjects_materials[0][source_material]" class="form-control" placeholder="Source Material" required>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" id="add-subject" class="btn btn-primary mt-3">Add More Subjects</button>
+        </div>
+
+        <button type="submit" class="btn btn-success mt-3">Save</button>
+    </form>
+</div>
+
+@section('scripts')
+<script>
+    let subjectIndex = 1;
+
+    document.getElementById('add-subject').addEventListener('click', function () {
+        let subjectMaterialRow = `
+            <div class="form-row mt-2">
+                <div class="col">
+                    <input type="text" name="subjects_materials[${subjectIndex}][subject]" class="form-control" placeholder="Subject Name" required>
+                </div>
+                <div class="col">
+                    <input type="text" name="subjects_materials[${subjectIndex}][source_material]" class="form-control" placeholder="Source Material" required>
+                </div>
+            </div>
+        `;
+        document.getElementById('subjects-section').insertAdjacentHTML('beforeend', subjectMaterialRow);
+        subjectIndex++;
+    });
+</script>
+@endsection
+@endsection
+```
+
+- **Dynamic Form Fields:** The form allows you to add additional subjects and their corresponding source materials. When you click the **Add More Subjects** button, it dynamically adds new fields for subjects and their source materials.
+- The form sends an array of subjects and materials to the controller (`subjects_materials[0][subject]`, `subjects_materials[0][source_material]`, etc.).
+
+#### 4. **Storing and Retrieving Data:**
+
+- **Storing**: The `subjects_materials` array is encoded as a JSON object and saved into the database.
+- **Retrieving**: When you fetch this data from the database, you can decode it and display the subjects and source materials:
+
+```php
+$sourceUsed = SourceUsed::find($id);
+$subjectsMaterials = json_decode($sourceUsed->subjects_materials, true);
+
+// Accessing individual subjects and source materials
+foreach ($subjectsMaterials as $subject => $material) {
+    echo "$subject: $material";
+}
+```
+
+### Conclusion:
+
+- **Single Record per Student:** Each student has only one record in the `sources_useds` table, and multiple subjects are stored as a JSON object in the `subjects_materials` field.
+- **Scalable:** You can easily add more subjects and materials for each student, and the structure will scale well even if the number of subjects increases.
+- **Flexible Input:** You can dynamically add more subjects using JavaScript in the front end.
+- **No Issues with More or Less Subjects:** You don't need to worry about students having more or fewer subjects. The JSON structure allows flexibility.
+
+This approach is highly flexible, scalable, and allows you to easily store multiple subjects and their source materials for each student in a single record.
+
+
+
+Sure! Below is a complete solution for your scenario, where students can have multiple subjects and corresponding source materials, and all of this information is stored in a **single record** for each student using a **JSON column** in the database.
+
+### 1. **Migration:**
+
+The migration will create the `sources_useds` table with a `json` column to store subjects and source materials.
+
+#### Migration: `create_sources_useds_table.php`
+
+```php
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreateSourcesUsedsTable extends Migration
+{
+    public function up()
+    {
+        Schema::create('sources_useds', function (Blueprint $table) {
+            $table->id(); // SourceID
+            $table->foreignId('student_id')->constrained('students')->onDelete('cascade');
+            $table->json('subjects_materials'); // This will store subjects and source materials in JSON format
+            $table->timestamps();
+            $table->softDeletes();
+        });
+    }
+
+    public function down()
+    {
+        Schema::dropIfExists('sources_useds');
+    }
+}
+```
+
+- **`subjects_materials`**: A `json` column that will hold the subjects and their corresponding source materials in a structured format.
+
+### 2. **Model:**
+
+The model represents the data from the `sources_useds` table. We will define the relationships and cast the `subjects_materials` as an array for easy access.
+
+#### Model: `SourceUsed.php`
+
+```php
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class SourceUsed extends Model
+{
+    use HasFactory, SoftDeletes;
+
+    protected $fillable = [
+        'student_id',
+        'subjects_materials',
+    ];
+
+    protected $casts = [
+        'subjects_materials' => 'array', // Automatically cast to an array when accessing this field
+    ];
+
+    public function student()
+    {
+        return $this->belongsTo(Student::class);
+    }
+}
+```
+
+- **`$casts`**: This will automatically cast the `subjects_materials` column to an array when retrieved from the database, so you don't need to manually decode the JSON.
+- **Relationship**: The `SourceUsed` model is related to the `Student` model via `student_id`.
+
+### 3. **Controller:**
+
+In the controller, we handle storing, updating, and displaying the student's subjects and source materials.
+
+#### Controller: `SourceUsedController.php`
+
+```php
+namespace App\Http\Controllers;
+
+use App\Models\SourceUsed;
+use App\Models\Student;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Log;
+
+class SourceUsedController extends Controller
+{
+    // Show all source used records
+    public function index()
+    {
+        $sourcesUsed = SourceUsed::all();
+        return view('sources-used.index', compact('sourcesUsed'));
+    }
+
+    // Show the form to create a new source used record
+    public function create()
+    {
+        $students = Student::all();
+        return view('sources-used.create', compact('students'));
+    }
+
+    // Store the source used record
+    public function store(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'student_id' => 'required|exists:students,id',
+                'subjects_materials' => 'required|array',
+                'subjects_materials.*.subject' => 'required|string',
+                'subjects_materials.*.source_material' => 'required|string',
+            ]);
+
+            $subjectsMaterials = $validated['subjects_materials'];
+            $subjects = [];
+
+            foreach ($subjectsMaterials as $item) {
+                $subjects[$item['subject']] = $item['source_material'];
+            }
+
+            SourceUsed::create([
+                'student_id' => $validated['student_id'],
+                'subjects_materials' => json_encode($subjects),
+            ]);
+
+            return redirect()->route('sources-used.index')->with('success', 'Source materials added successfully.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            Log::error('Error storing source used: ' . $e->getMessage());
+            return redirect()->route('sources-used.index')->with('error', 'Failed to add source materials. Please try again later.');
+        }
+    }
+
+    // Show the form to edit a source used record
+    public function edit(SourceUsed $sourceUsed)
+    {
+        $students = Student::all();
+        return view('sources-used.edit', compact('sourceUsed', 'students'));
+    }
+
+    // Update the source used record
+    public function update(Request $request, SourceUsed $sourceUsed)
+    {
+        try {
+            $validated = $request->validate([
+                'student_id' => [
+                    'required',
+                    'exists:students,id',
+                    Rule::unique('sources_useds')->ignore($sourceUsed->id)->whereNull('deleted_at'),
+                ],
+                'subjects_materials' => 'required|array',
+                'subjects_materials.*.subject' => 'required|string',
+                'subjects_materials.*.source_material' => 'required|string',
+            ]);
+
+            $subjectsMaterials = $validated['subjects_materials'];
+            $subjects = [];
+
+            foreach ($subjectsMaterials as $item) {
+                $subjects[$item['subject']] = $item['source_material'];
+            }
+
+            $sourceUsed->update([
+                'student_id' => $validated['student_id'],
+                'subjects_materials' => json_encode($subjects),
+            ]);
+
+            return redirect()->route('sources-used.index')->with('success', 'Source materials updated successfully.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            Log::error('Error updating source used: ' . $e->getMessage());
+            return redirect()->route('sources-used.index')->with('error', 'Failed to update source materials. Please try again later.');
+        }
+    }
+
+    // Delete the source used record
+    public function destroy(SourceUsed $sourceUsed)
+    {
+        try {
+            $sourceUsed->delete();
+            return redirect()->route('sources-used.index')->with('success', 'Source materials deleted successfully.');
+        } catch (\Exception $e) {
+            Log::error('Error deleting source used: ' . $e->getMessage());
+            return redirect()->route('sources-used.index')->with('error', 'Failed to delete source materials. Please try again later.');
+        }
+    }
+}
+```
+
+- **`store()` and `update()` methods**: Both methods validate the input (subjects and source materials), prepare the data as an array, and store/update it as a JSON object in the `subjects_materials` field.
+- **Validation** ensures that subjects and source materials are correctly formatted.
+- **Error handling** is in place to handle validation exceptions and other errors that may occur during data processing.
+
+### 4. **Views:**
+
+#### **Create View:**
+
+`resources/views/sources-used/create.blade.php`
+
+```php
+@extends('layouts.app')
+
+@section('content')
+<div class="container">
+    <h1>Add Source Materials for Student</h1>
+
+    <form method="POST" action="{{ route('sources-used.store') }}">
+        @csrf
+
+        <div class="form-group">
+            <label for="student_id">Student</label>
+            <select name="student_id" class="form-control @error('student_id') is-invalid @enderror" required>
+                <option value="">Select Student</option>
+                @foreach($students as $student)
+                    <option value="{{ $student->id }}" {{ old('student_id') == $student->id ? 'selected' : '' }}>
+                        {{ $student->name }}
+                    </option>
+                @endforeach
+            </select>
+            @error('student_id') 
+                <div class="invalid-feedback">{{ $message }}</div> 
+            @enderror
+        </div>
+
+        <div class="form-group" id="subjects-section">
+            <label for="subjects">Subjects and Materials</label>
+
+            <!-- Dynamic form fields for subjects and source materials -->
+            <div class="subject-material">
+                <div class="form-row">
+                    <div class="col">
+                        <input type="text" name="subjects_materials[0][subject]" class="form-control" placeholder="Subject Name" required>
+                    </div>
+                    <div class="col">
+                        <input type="text" name="subjects_materials[0][source_material]" class="form-control" placeholder="Source Material" required>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" id="add-subject" class="btn btn-primary mt-3">Add More Subjects</button>
+        </div>
+
+        <button type="submit" class="btn btn-success mt-3">Save</button>
+    </form>
+</div>
+
+@section('scripts')
+<script>
+    let subjectIndex = 1;
+
+    document.getElementById('add-subject').addEventListener('click', function () {
+        let subjectMaterialRow = `
+            <div class="form-row mt-2">
+                <div class="col">
+                    <input type="text" name="subjects_materials[${subjectIndex}][subject]" class="form-control" placeholder="Subject Name" required>
+                </div>
+                <div class="col">
+                    <input type="text" name="subjects_materials[${subjectIndex}][source_material]" class="form-control" placeholder="Source Material" required>
+                </div>
+            </div>
+        `;
+        document.getElementById('subjects-section').insertAdjacentHTML('beforeend', subjectMaterialRow);
+        subjectIndex++;
+    });
+</script>
+@endsection
+@endsection
+```
+
+- **Dynamic Form Fields**: This allows adding multiple subjects with their respective source materials. You can add more subjects dynamically.
+- **Validation Messages**: The form includes basic validation feedback.
+
+#### **Index View (Listing Source Used Records):**
+
+`resources/views/sources-used/index.blade.php`
+
+```php
+@extends('layouts.app')
+
+@section('content')
+<div class="container">
+    <h1>Source Materials List</h1>
+
+    @if(session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @elseif(session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Subjects</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($sourcesUsed as $sourceUsed)
+                <tr>
+                    <td>{{ $sourceUsed->student->name }}</td>
+                    <td>
+                        @foreach(json_decode($sourceUsed->subjects_materials, true) as $subject => $material)
+                            <strong>{{ $subject }}:</strong> {{ $material }}<br>
+                        @endforeach
+                    </td>
+                    <td>
+                        <a href="{{ route('sources-used.edit', $sourceUsed->id) }}" class="btn btn-warning">Edit</a>
+                        <form action="{{ route('sources-used.destroy', $sourceUsed->id) }}" method="POST" style="display:inline-block;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+
+</div>
+@endsection
+```
+
+### Conclusion:
+
+This solution ensures that each student has one record where multiple subjects and source materials can be stored in a single column using a JSON format. This is a flexible and scalable approach for managing subjects and source materials.
+
+You can easily add or remove subjects and materials, and the system will adapt to varying amounts of data.
+
+
+================
+Subject Dropdown and Edit and show view:
+
+Certainly! I'll update the solution with the following changes:
+
+1. **Subject Selection Dropdown**: Instead of input fields for the subject name, we'll use a dropdown for selecting predefined subjects like "Indian Polity," "Economics," etc.
+2. **Complete Code for Edit and Show Views**: I'll provide complete code for both the **Edit** and **Show** views.
+
+### 1. **Migration:**
+
+No changes are needed for the migration since we're still using a `json` column for the subjects and their source materials.
+
+### 2. **Model:**
+
+No changes needed in the model, as it's already configured to handle `subjects_materials` as an array.
+
+### 3. **Controller:**
+
+The `store` and `update` methods in the controller remain the same, but I will provide the updated version to reflect the dropdown changes.
+
+#### Controller: `SourceUsedController.php` (Updated `store` and `update` methods)
+
+```php
+namespace App\Http\Controllers;
+
+use App\Models\SourceUsed;
+use App\Models\Student;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Log;
+
+class SourceUsedController extends Controller
+{
+    // Show all source used records
+    public function index()
+    {
+        $sourcesUsed = SourceUsed::all();
+        return view('sources-used.index', compact('sourcesUsed'));
+    }
+
+    // Show the form to create a new source used record
+    public function create()
+    {
+        $students = Student::all();
+        $subjects = [
+            'Indian Polity' => 'Indian Polity',
+            'Economics' => 'Economics',
+            'Geography' => 'Geography',
+            'Environment' => 'Environment',
+            'Art & Culture' => 'Art & Culture',
+        ];
+        return view('sources-used.create', compact('students', 'subjects'));
+    }
+
+    // Store the source used record
+    public function store(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'student_id' => 'required|exists:students,id',
+                'subjects_materials' => 'required|array',
+                'subjects_materials.*.subject' => 'required|in:Indian Polity,Economics,Geography,Environment,Art & Culture',
+                'subjects_materials.*.source_material' => 'required|string',
+            ]);
+
+            $subjectsMaterials = $validated['subjects_materials'];
+            $subjects = [];
+
+            foreach ($subjectsMaterials as $item) {
+                $subjects[$item['subject']] = $item['source_material'];
+            }
+
+            SourceUsed::create([
+                'student_id' => $validated['student_id'],
+                'subjects_materials' => json_encode($subjects),
+            ]);
+
+            return redirect()->route('sources-used.index')->with('success', 'Source materials added successfully.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            Log::error('Error storing source used: ' . $e->getMessage());
+            return redirect()->route('sources-used.index')->with('error', 'Failed to add source materials. Please try again later.');
+        }
+    }
+
+    // Show the form to edit a source used record
+    public function edit(SourceUsed $sourceUsed)
+    {
+        $students = Student::all();
+        $subjects = [
+            'Indian Polity' => 'Indian Polity',
+            'Economics' => 'Economics',
+            'Geography' => 'Geography',
+            'Environment' => 'Environment',
+            'Art & Culture' => 'Art & Culture',
+        ];
+
+        // Decode the stored JSON data into an array
+        $subjectsMaterials = json_decode($sourceUsed->subjects_materials, true);
+
+        return view('sources-used.edit', compact('sourceUsed', 'students', 'subjects', 'subjectsMaterials'));
+    }
+
+    // Update the source used record
+    public function update(Request $request, SourceUsed $sourceUsed)
+    {
+        try {
+            $validated = $request->validate([
+                'student_id' => [
+                    'required',
+                    'exists:students,id',
+                    Rule::unique('sources_useds')->ignore($sourceUsed->id)->whereNull('deleted_at'),
+                ],
+                'subjects_materials' => 'required|array',
+                'subjects_materials.*.subject' => 'required|in:Indian Polity,Economics,Geography,Environment,Art & Culture',
+                'subjects_materials.*.source_material' => 'required|string',
+            ]);
+
+            $subjectsMaterials = $validated['subjects_materials'];
+            $subjects = [];
+
+            foreach ($subjectsMaterials as $item) {
+                $subjects[$item['subject']] = $item['source_material'];
+            }
+
+            $sourceUsed->update([
+                'student_id' => $validated['student_id'],
+                'subjects_materials' => json_encode($subjects),
+            ]);
+
+            return redirect()->route('sources-used.index')->with('success', 'Source materials updated successfully.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            Log::error('Error updating source used: ' . $e->getMessage());
+            return redirect()->route('sources-used.index')->with('error', 'Failed to update source materials. Please try again later.');
+        }
+    }
+
+    // Delete the source used record
+    public function destroy(SourceUsed $sourceUsed)
+    {
+        try {
+            $sourceUsed->delete();
+            return redirect()->route('sources-used.index')->with('success', 'Source materials deleted successfully.');
+        } catch (\Exception $e) {
+            Log::error('Error deleting source used: ' . $e->getMessage());
+            return redirect()->route('sources-used.index')->with('error', 'Failed to delete source materials. Please try again later.');
+        }
+    }
+}
+```
+
+### 4. **Views:**
+
+#### **Create View** (`resources/views/sources-used/create.blade.php`)
+
+This view will allow users to select subjects from a dropdown and enter the corresponding source material.
+
+```php
+@extends('layouts.app')
+
+@section('content')
+<div class="container">
+    <h1>Add Source Materials for Student</h1>
+
+    <form method="POST" action="{{ route('sources-used.store') }}">
+        @csrf
+
+        <div class="form-group">
+            <label for="student_id">Student</label>
+            <select name="student_id" class="form-control @error('student_id') is-invalid @enderror" required>
+                <option value="">Select Student</option>
+                @foreach($students as $student)
+                    <option value="{{ $student->id }}" {{ old('student_id') == $student->id ? 'selected' : '' }}>
+                        {{ $student->name }}
+                    </option>
+                @endforeach
+            </select>
+            @error('student_id') 
+                <div class="invalid-feedback">{{ $message }}</div> 
+            @enderror
+        </div>
+
+        <div class="form-group" id="subjects-section">
+            <label for="subjects">Subjects and Materials</label>
+
+            <!-- Dynamic form fields for subjects and source materials -->
+            <div class="subject-material">
+                <div class="form-row">
+                    <div class="col">
+                        <select name="subjects_materials[0][subject]" class="form-control" required>
+                            <option value="">Select Subject</option>
+                            @foreach($subjects as $key => $subject)
+                                <option value="{{ $key }}" {{ old('subjects_materials.0.subject') == $key ? 'selected' : '' }}>
+                                    {{ $subject }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col">
+                        <input type="text" name="subjects_materials[0][source_material]" class="form-control" placeholder="Source Material" required>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" id="add-subject" class="btn btn-primary mt-3">Add More Subjects</button>
+        </div>
+
+        <button type="submit" class="btn btn-success mt-3">Save</button>
+    </form>
+</div>
+
+@section('scripts')
+<script>
+    let subjectIndex = 1;
+
+    document.getElementById('add-subject').addEventListener('click', function () {
+        let subjectMaterialRow = `
+            <div class="form-row mt-2">
+                <div class="col">
+                    <select name="subjects_materials[${subjectIndex}][subject]" class="form-control" required>
+                        <option value="">Select Subject</option>
+                        @foreach($subjects as $key => $subject)
+                            <option value="{{ $key }}" {{ old('subjects_materials.${subjectIndex}.subject') == $key ? 'selected' : '' }}>
+                                {{ $subject }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col">
+                    <input type="text" name="subjects_materials[${subjectIndex}][source_material]" class="form-control" placeholder="Source Material" required>
+                </div>
+            </div>
+        `;
+        document.getElementById('subjects-section').insertAdjacentHTML('beforeend', subjectMaterialRow);
+        subjectIndex++;
+    });
+</script>
+@endsection
+@endsection
+```
+
+#### **Edit View** (`resources/views/sources-used/edit.blade.php`)
+
+The edit view will allow the user to modify the existing subject and source material pairs.
+
+```php
+@extends('layouts.app')
+
+@section('content')
+<div class="container">
+    <h1>Edit Source Materials for Student</h1>
+
+    <form method="POST" action="{{ route('sources-used.update', $sourceUsed->id) }}">
+        @csrf
+        @method('PUT')
+
+        <div class="form-group">
+            <label for="student_id">Student</label>
+            <select name="student_id" class="form-control @error('student_id') is-invalid @enderror" required>
+                <option value="">Select Student</option>
+                @foreach($students as $student)
+                    <option value="{{ $student->id }}" {{ $student->id == $sourceUsed->student_id ? 'selected' : '' }}>
+                        {{ $student->name }}
+                    </option>
+                @endforeach
+            </select>
+            @error('student_id') 
+                <div class="invalid-feedback">{{ $message }}</div> 
+            @enderror
+        </div>
+
+        <div class="form-group" id="subjects-section">
+            <label
+
+ for="subjects">Subjects and Materials</label>
+
+            @foreach($subjectsMaterials as $index => $subjectMaterial)
+                <div class="form-row mt-2">
+                    <div class="col">
+                        <select name="subjects_materials[{{ $index }}][subject]" class="form-control" required>
+                            <option value="">Select Subject</option>
+                            @foreach($subjects as $key => $subject)
+                                <option value="{{ $key }}" {{ $key == $subjectMaterial['subject'] ? 'selected' : '' }}>
+                                    {{ $subject }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col">
+                        <input type="text" name="subjects_materials[{{ $index }}][source_material]" class="form-control" placeholder="Source Material" value="{{ $subjectMaterial['source_material'] }}" required>
+                    </div>
+                </div>
+            @endforeach
+
+            <button type="button" id="add-subject" class="btn btn-primary mt-3">Add More Subjects</button>
+        </div>
+
+        <button type="submit" class="btn btn-success mt-3">Update</button>
+    </form>
+</div>
+
+@section('scripts')
+<script>
+    let subjectIndex = {{ count($subjectsMaterials) }};
+
+    document.getElementById('add-subject').addEventListener('click', function () {
+        let subjectMaterialRow = `
+            <div class="form-row mt-2">
+                <div class="col">
+                    <select name="subjects_materials[${subjectIndex}][subject]" class="form-control" required>
+                        <option value="">Select Subject</option>
+                        @foreach($subjects as $key => $subject)
+                            <option value="{{ $key }}" {{ old('subjects_materials.${subjectIndex}.subject') == $key ? 'selected' : '' }}>
+                                {{ $subject }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col">
+                    <input type="text" name="subjects_materials[${subjectIndex}][source_material]" class="form-control" placeholder="Source Material" required>
+                </div>
+            </div>
+        `;
+        document.getElementById('subjects-section').insertAdjacentHTML('beforeend', subjectMaterialRow);
+        subjectIndex++;
+    });
+</script>
+@endsection
+@endsection
+```
+
+#### **Show View** (`resources/views/sources-used/show.blade.php`)
+
+The show view displays the student's source materials for each subject.
+
+```php
+@extends('layouts.app')
+
+@section('content')
+<div class="container">
+    <h1>Source Materials for {{ $sourceUsed->student->name }}</h1>
+
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Subject</th>
+                    <th>Source Material</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(json_decode($sourceUsed->subjects_materials, true) as $subject => $material)
+                    <tr>
+                        <td>{{ $subject }}</td>
+                        <td>{{ $material }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+
+    <a href="{{ route('sources-used.index') }}" class="btn btn-secondary mt-3">Back to List</a>
+</div>
+@endsection
+```
+
+### Conclusion:
+
+Now you have:
+
+1. **Dropdowns for Subject Selection**: Each form for creating or editing source material now includes a dropdown for selecting predefined subjects like "Indian Polity," "Economics," etc.
+2. **Show View**: The show view displays all the source materials for a particular student in a table format.
+3. **Edit View**: The edit view lets users modify existing subject-source material pairs.
+
+This implementation is flexible and scalable, ensuring that you can manage multiple subjects and source materials for each student in a user-friendly manner.

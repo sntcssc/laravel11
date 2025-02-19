@@ -12,6 +12,11 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         //
+        $middleware->alias([
+            'student.auth' => \App\Http\Middleware\StudentAuth::class,
+            'student.verified' => \App\Http\Middleware\VerifyStudent::class,
+        ]);
+        
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
