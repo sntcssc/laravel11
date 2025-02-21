@@ -43,6 +43,7 @@ return new class extends Migration
             $table->text('permanent_address')->nullable();
             $table->text('permanent_pin')->nullable();
             $table->text('photo')->nullable();
+            $table->text('image')->nullable();
             $table->string('status')->default('0');
             $table->string('is_update')->default('0');
             $table->boolean('login')->default('0');

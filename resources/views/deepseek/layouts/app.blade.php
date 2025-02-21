@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Satyendra Nath Tagore Civil Services Study Centre</title>
+    <link rel="icon" href="https://csscwb.in/assets/front-end/images/others/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" type="image/x-icon" href="https://csscwb.in/assets/front-end/images/others/favicon.ico">
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -153,8 +155,10 @@
     <header class="header">
         <div class="container">
             <div class="row align-items-center">
-                <div class="col-lg-1 col-md-2 col-3">
-                    <img src="https://csscwb.in/assets/front-end/images/others/sntcssc-logo.png" alt="Institute Logo" class="img-fluid" style="max-height: 70px;">
+                <div class="col-lg-1 col-md-2 text-center">
+                    <a href="https://csscwb.in">
+                        <img src="https://csscwb.in/assets/front-end/images/others/sntcssc-logo.png" alt="Institute Logo" class="img-fluid" style="max-height: 70px;">
+                    </a>
                 </div>
                 <div class="col-lg-6 col-md-6 col-12 text-center">
                     <div class="institute-info">
@@ -198,18 +202,18 @@
                 <div class="col-md-4">
                     <h5 class="mb-3">Quick Links</h5>
                     <ul class="list-unstyled small">
-                        <li><a href="#" class="text-decoration-none text-white opacity-75">Courses</a></li>
-                        <li><a href="#" class="text-decoration-none text-white opacity-75">Faculty</a></li>
-                        <li><a href="#" class="text-decoration-none text-white opacity-75">Results</a></li>
+                        <li><a href="https://csscwb.in" target="_blank" class="text-decoration-none text-white opacity-75">Home</a></li>
+                        <li><a href="https://csscwb.in/contact" target="_blank" class="text-decoration-none text-white opacity-75">Contact</a></li>
+                        <li><a href="https://csscwb.in/all-news" target="_blank" class="text-decoration-none text-white opacity-75">News</a></li>
                     </ul>
                 </div>
                 <div class="col-md-4">
                     <h5 class="mb-3">Connect With Us</h5>
                     <div class="social-links">
-                        <a href="#" target="_blank"><i class="bi bi-facebook fs-5"></i></a>
-                        <a href="#" target="_blank"><i class="bi bi-twitter fs-5"></i></a>
+                        <a href="https://www.facebook.com/sntcssc" target="_blank"><i class="bi bi-facebook fs-5"></i></a>
+                        <a href="https://x.com/sntcssc" target="_blank"><i class="bi bi-twitter fs-5"></i></a>
                         <a href="#" target="_blank"><i class="bi bi-linkedin fs-5"></i></a>
-                        <a href="#" target="_blank"><i class="bi bi-youtube fs-5"></i></a>
+                        <a href="https://www.youtube.com/@sntcssc" target="_blank"><i class="bi bi-youtube fs-5"></i></a>
                     </div>
                 </div>
             </div>

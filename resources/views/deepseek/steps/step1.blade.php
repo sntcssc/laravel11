@@ -76,7 +76,7 @@
                             <div class="col-md-6">
                                 <label for="dob" class="form-label">Date of Birth</label>
                                 <input type="date" class="form-control @error('dob') is-invalid @enderror" 
-                                    id="dob" name="dob" value="{{ old('dob', $student->dob ? $student->dob->format('Y-m-d') : '') }}" required readonly>
+                                    id="dob" name="dob" value="{{ old('dob', $student->dob ? $student->dob->format('Y-m-d') : '') }}" required>
                                 @error('dob')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -117,7 +117,7 @@
                             <div class="col-md-6">
                                 <label for="mobile_number" class="form-label">Mobile Number</label>
                                 <input type="tel" class="form-control @error('mobile_number') is-invalid @enderror" 
-                                    id="mobile_number" name="mobile_number" value="{{ old('mobile_number', $student->mobile_number ?? '') }}" required>
+                                    id="mobile_number" name="mobile_number" value="{{ old('mobile_number', $student->mobile_number ?? '') }}" required readonly>
                                 @error('mobile_number')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -137,7 +137,7 @@
                             <div class="col-md-6">
                                 <label for="email" class="form-label">Email ID</label>
                                 <input type="email" class="form-control @error('email') is-invalid @enderror" 
-                                    id="email" name="email" value="{{ old('email', $student->email ?? '') }}" required>
+                                    id="email" name="email" value="{{ old('email', $student->email ?? '') }}" required readonly>
                                 @error('email')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror

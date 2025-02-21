@@ -16,14 +16,14 @@ class BatchesTableSeeder extends Seeder
     {
         // Inserting the batches data
         DB::table('batches')->insert([
-            [
-                'name' => '2020',
-                'start_date' => Carbon::create('2020', '01', '01')->toDateString(),
-                'end_date' => Carbon::create('2020', '12', '31')->toDateString(),
-                'status' => 1,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
+            // [
+            //     'name' => '2020',
+            //     'start_date' => Carbon::create('2020', '01', '01')->toDateString(),
+            //     'end_date' => Carbon::create('2020', '12', '31')->toDateString(),
+            //     'status' => 1,
+            //     'created_at' => now(),
+            //     'updated_at' => now(),
+            // ],
             [
                 'name' => '2021',
                 'start_date' => Carbon::create('2021', '01', '01')->toDateString(),

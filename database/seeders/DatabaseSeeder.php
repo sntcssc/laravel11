@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
             ProgramsTableSeeder::class,
             BatchesTableSeeder::class,
             SectionsTableSeeder::class,
-            StudentsTableSeeder::class,
+            // StudentsTableSeeder::class,
         ]);
     }
 }

@@ -295,7 +295,7 @@ class DeepseekFormController extends Controller
 
             // Store with custom name
             $path = $request->file('photo')->storeAs(
-                'photos',
+                '', //photos
                 Str::lower($filename),
                 'public'
             );

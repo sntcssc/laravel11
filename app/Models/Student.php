@@ -57,7 +57,7 @@ class Student extends Model
         'father_name', 'father_occupation', 'mother_name', 'mother_occupation', 'dob', 'gender', 'category', 'mobile_number', 
         'whatsapp_number', 'email', 'present_state', 'present_district', 
         'present_address', 'present_pin', 'permanent_state', 'permanent_district', 
-        'permanent_address', 'permanent_pin', 'photo', 'current_step'
+        'permanent_address', 'permanent_pin', 'photo', 'image', 'current_step'
     ];
 
     // Relationships
