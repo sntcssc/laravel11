@@ -240,3 +240,25 @@ Route::post('/student/confirm-submission', [StudentInfoController::class, 'confi
 // Route::get('admin/students/{student}/enrollments/current', [EnrollmentController::class, 'showCurrentEnrollments'])->name('students.currentEnrollments');
 // Route::post('admin/students/{student}/enroll', [EnrollmentController::class, 'enroll'])->name('students.enroll');
 // Route::delete('admin/students/{student}/enrollment/{enrollment}', [EnrollmentController::class, 'withdraw'])->name('students.withdraw');
+
+
+
+//Reoptimized class loader:
+Route::get('/optimize', function() {
+    $exitCode = Artisan::call('optimize');
+    return '<h1>Reoptimized class loader</h1>';
+});
+
+// Clear All at once
+
+Route::get('/clear', function() {
+
+    Artisan::call('cache:clear');
+    Artisan::call('config:clear');
+    Artisan::call('config:cache');
+    Artisan::call('view:clear');
+    Artisan::call('route:clear');
+
+    return "Cleared!";
+
+});

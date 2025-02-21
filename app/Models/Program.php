@@ -23,4 +23,10 @@ class Program extends Model
     {
         return $this->hasMany(Section::class);
     }
+
+    // Define an accessor to get the program name
+    public function getProgramNameAttribute()
+    {
+        return $this->name; // Just returning the name field, but you could format it if needed.
+    }
 }

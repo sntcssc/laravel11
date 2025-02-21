@@ -7,7 +7,7 @@
     <div class="card shadow">
         <div class="card-header bg-primary text-white">Step 3: Preparation Details</div>
         <div class="card-body">
-            <form method="POST" action="{{ route('form.step', ['step' => 3]) }}">
+            <form method="POST" id="stepForm" action="{{ route('form.step', ['step' => 3]) }}" enctype="multipart/form-data">
                 @csrf
                 <div class="row g-3">
                     <!-- Highest Education Qualification -->
@@ -288,7 +288,14 @@
                         @error('note_preparation_for_pyqs')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary">Next</button>
+
+                    <!-- Submit Button -->
+                    <div class="col-12">
+                        <button type="submit" id="submitButton" class="btn btn-primary mt-3">
+                            <span id="spinner"></span>
+                            <span id="submitText">Save and Continue</span>
+                        </button>
+                    </div>
             </form>
         </div>
     </div>

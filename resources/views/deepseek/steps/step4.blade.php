@@ -6,7 +6,7 @@
     <div class="card shadow">
         <div class="card-header bg-primary text-white">Step 4: Sources You Are Referring To:</div>
         <div class="card-body">
-            <form method="POST" action="{{ route('form.step', ['step' => 4]) }}" id="sources-form">
+            <form method="POST" id="stepForm" action="{{ route('form.step', ['step' => 4]) }}" id="sources-form">
                 <p><b>List the study materials you are using for the following subjects:</b></p>
                 @csrf
                 <div id="sources-container">
@@ -47,7 +47,14 @@
                         </div>
                     @endforeach
                 </div>
-                <button type="submit" class="btn btn-primary mt-3">Next</button>
+
+                    <!-- Submit Button -->
+                    <div class="col-12">
+                        <button type="submit" id="submitButton" class="btn btn-primary mt-3">
+                            <span id="spinner"></span>
+                            <span id="submitText">Save and Continue</span>
+                        </button>
+                    </div>
             </form>
         </div>
     </div>

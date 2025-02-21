@@ -16,7 +16,7 @@ class StudentVerified
     public function handle(Request $request, Closure $next): Response
     {
         if (!$request->session()->has('verified_student')) {
-            return redirect()->route('student.verification');
+            return redirect()->route('student.check');
         }
         return $next($request);
     }

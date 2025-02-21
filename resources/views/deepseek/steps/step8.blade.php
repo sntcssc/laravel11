@@ -7,7 +7,7 @@
     <div class="card shadow">
         <div class="card-header bg-primary text-white">Step 8: How much you know your Special Focus Group (SFG) program?</div>
         <div class="card-body">
-            <form method="POST" action="{{ route('form.step', ['step' => 8]) }}">
+            <form method="POST" id="stepForm" action="{{ route('form.step', ['step' => 8]) }}">
                 @csrf
                 <div class="row g-3">
 
@@ -136,7 +136,13 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary m-2">Next</button>
+                    <!-- Submit Button -->
+                    <div class="col-12">
+                        <button type="submit" id="submitButton" class="btn btn-primary mt-3">
+                            <span id="spinner"></span>
+                            <span id="submitText">Submit</span>
+                        </button>
+                    </div>
             </form>
         </div>
     </div>

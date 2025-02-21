@@ -19,6 +19,8 @@ use Illuminate\Support\Facades\DB;
 use PDF;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Validator;
+
 
 class DeepseekFormController extends Controller
 {
@@ -200,8 +202,11 @@ class DeepseekFormController extends Controller
         ]
     ];
 
-    public function showVerification()
+    public function showVerification(Request $request)
     {
+        // Clear all session data
+        // $request->session()->flush();
+
         return view('deepseek.verification');
     }
 
@@ -209,15 +214,26 @@ class DeepseekFormController extends Controller
     {
         $request->validate([
             'unique_id' => 'required|string',
-            'dob' => 'required|date'
+            'email' => 'required|email',
+            // 'dob' => 'required|date'
         ]);
 
         $student = Student::where('unique_id', $request->unique_id)
-            ->where('dob', $request->dob)
+            // ->where('dob', $request->dob)
+            ->where('email', $request->email)
             ->first();
 
         if (!$student) {
-            return back()->withErrors(['error' => 'Invalid credentials']);
+            return back()->withErrors(['error' => 'Invalid Student ID or Email ID'])->withInput();
+        }
+
+        // Check if already completed
+        if ($student->current_step > 8) {
+            session(['verified_student' => $student->id]);
+            return redirect()->route('form.complete')->with([
+                'message' => 'Your Information has already been submitted.',
+                'student' => $student
+            ]);
         }
 
         session(['verified_student' => $student->id]);
@@ -227,6 +243,14 @@ class DeepseekFormController extends Controller
     public function showStep($step)
     {
         $student = $this->getStudent();
+    
+        // Redirect if already completed
+        if ($student->current_step > 8) {
+            return redirect()->route('form.complete')->with([
+                'message' => 'You have already submitted your application.',
+                'student' => $student
+            ]);
+        }
         
         if ($student->current_step != $step) {
             return redirect()->route('form.step', ['step' => $student->current_step]);
@@ -330,8 +354,9 @@ class DeepseekFormController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            dd($e->getMessage());
-            return back()->withErrors(['error' => 'Submission failed: ' . $e->getMessage()]);
+            // dd($e->errors());
+            return back()->withErrors(['error' => 'Submission failed: ' . $e->getMessage()])
+            ->withInput();
         }
     }
 
@@ -421,7 +446,18 @@ class DeepseekFormController extends Controller
 
     public function completion()
     {
-        return view('deepseek.completion');
+        $student = $this->getStudent();
+
+
+        if ($student->current_step < 8) {
+            return redirect()->route('student.verification')->withErrors(['error' => 'You Have not submitted your form yet!!']);
+        }
+        
+        return view('deepseek.completion', [
+            'student' => $student,
+            'message' => session('message', 'Your Information has already been submitted.')
+        ]);
+        // return view('deepseek.completion');
     }
 
     private function getStudent()

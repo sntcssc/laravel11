@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'student.auth' => \App\Http\Middleware\StudentAuth::class,
             'student.verified' => \App\Http\Middleware\VerifyStudent::class,
+            'student.verify' => \App\Http\Middleware\StudentVerified::class,
         ]);
         
     })

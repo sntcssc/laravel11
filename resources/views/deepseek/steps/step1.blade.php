@@ -6,7 +6,7 @@
     <div class="card shadow">
         <div class="card-header bg-primary text-white">Step 1: Personal Information</div>
         <div class="card-body">
-            <form method="POST" class="needs-validation" action="{{ route('form.step', ['step' => 1]) }}" enctype="multipart/form-data">
+            <form method="POST" class="needs-validation" id="stepForm" action="{{ route('form.step', ['step' => 1]) }}" enctype="multipart/form-data">
                 @csrf
                 <div class="row g-3">
                     <div class="container">
@@ -16,7 +16,7 @@
                             <div class="col-md-6">
                                 <label for="first_name" class="form-label">First Name</label>
                                 <input type="text" class="form-control @error('first_name') is-invalid @enderror" 
-                                    id="first_name" name="first_name" value="{{ old('first_name', $student->first_name ?? '') }}" required>
+                                    id="first_name" name="first_name" value="{{ old('first_name', $student->first_name ?? '') }}" required readonly>
                                 @error('first_name')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -26,7 +26,7 @@
                             <div class="col-md-6">
                                 <label for="last_name" class="form-label">Last Name</label>
                                 <input type="text" class="form-control @error('last_name') is-invalid @enderror" 
-                                    id="last_name" name="last_name" value="{{ old('last_name', $student->last_name ?? '') }}" required>
+                                    id="last_name" name="last_name" value="{{ old('last_name', $student->last_name ?? '') }}" required readonly>
                                 @error('last_name')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -76,7 +76,7 @@
                             <div class="col-md-6">
                                 <label for="dob" class="form-label">Date of Birth</label>
                                 <input type="date" class="form-control @error('dob') is-invalid @enderror" 
-                                    id="dob" name="dob" value="{{ old('dob', $student->dob ? $student->dob->format('Y-m-d') : '') }}" required>
+                                    id="dob" name="dob" value="{{ old('dob', $student->dob ? $student->dob->format('Y-m-d') : '') }}" required readonly>
                                 @error('dob')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -287,13 +287,44 @@
 
                     <!-- Submit Button -->
                     <div class="col-12">
-                        <button type="submit" class="btn btn-primary">Next</button>
+                        <button type="submit" id="submitButton" class="btn btn-primary mt-3">
+                            <span id="spinner"></span>
+                            <span id="submitText">Save and Continue</span>
+                        </button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+
+
+@push('scripts')
+<script>
+    document.getElementById('photoInput').addEventListener('change', function(e) {
+        const [file] = e.target.files;
+        const preview = document.querySelector('.img-preview');
+        const noPhoto = document.querySelector('.no-photo');
+        
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                if (!preview) {
+                    const img = document.createElement('img');
+                    img.classList.add('img-preview', 'img-fluid', 'rounded');
+                    img.style.maxHeight = '200px';
+                    img.src = e.target.result;
+                    document.querySelector('.preview-container').appendChild(img);
+                    if(noPhoto) noPhoto.style.display = 'none';
+                } else {
+                    preview.src = e.target.result;
+                }
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
 
 <script>
     // Function to copy Present Address, State, District, and Pin to Permanent Address
@@ -328,32 +359,5 @@
     });
 </script>
 
-
-
-@push('scripts')
-<script>
-document.getElementById('photoInput').addEventListener('change', function(e) {
-    const [file] = e.target.files;
-    const preview = document.querySelector('.img-preview');
-    const noPhoto = document.querySelector('.no-photo');
-    
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            if (!preview) {
-                const img = document.createElement('img');
-                img.classList.add('img-preview', 'img-fluid', 'rounded');
-                img.style.maxHeight = '200px';
-                img.src = e.target.result;
-                document.querySelector('.preview-container').appendChild(img);
-                if(noPhoto) noPhoto.style.display = 'none';
-            } else {
-                preview.src = e.target.result;
-            }
-        }
-        reader.readAsDataURL(file);
-    }
-});
-</script>
 @endpush
 @endsection

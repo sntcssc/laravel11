@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('sections', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();  // Section name, e.g., "A"
-            $table->foreignId('batch_id')->constrained()->onDelete('cascade');
+            // $table->foreignId('batch_id')->constrained()->onDelete('cascade');
             $table->integer('seat')->nullable();
             $table->boolean('status')->default('1');
             $table->timestamps();

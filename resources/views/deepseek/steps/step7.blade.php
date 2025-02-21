@@ -7,7 +7,7 @@
     <div class="card shadow">
         <div class="card-header bg-primary text-white">Step 7: Your Personality</div>
         <div class="card-body">
-            <form method="POST" action="{{ route('form.step', ['step' => 7]) }}">
+            <form method="POST" id="stepForm" action="{{ route('form.step', ['step' => 7]) }}">
                 @csrf
                 <!-- Reason for Civil Services -->
                 <div class="mb-3">
@@ -105,7 +105,13 @@
                     @error('distraction_timeline')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
 
-                <button type="submit" class="btn btn-primary">Next</button>
+                    <!-- Submit Button -->
+                    <div class="col-12">
+                        <button type="submit" id="submitButton" class="btn btn-primary mt-3">
+                            <span id="spinner"></span>
+                            <span id="submitText">Save and Continue</span>
+                        </button>
+                    </div>
             </form>
         </div>
     </div>

@@ -7,7 +7,7 @@
     <div class="card shadow">
         <div class="card-header bg-primary text-white">Step 2: Study Environment</div>
         <div class="card-body">
-            <form method="POST" action="{{ route('form.step', ['step' => 2]) }}">
+            <form method="POST" id="stepForm" action="{{ route('form.step', ['step' => 2]) }}">
                 @csrf
                 <div class="row g-2">
                     <!-- Self Study Hours -->
@@ -110,8 +110,8 @@
                         <select class="form-select @error('is_full_time_preparation') is-invalid @enderror" 
                                 name="is_full_time_preparation" required>
                             <option value="" disabled selected>Select an option</option>
-                            <option value="yes" {{ old('is_full_time_preparation') == 'yes' ? 'selected' : '' }}>Yes</option>
-                            <option value="no" {{ old('is_full_time_preparation') == 'no' ? 'selected' : '' }}>No</option>
+                            <option value="full time" {{ old('is_full_time_preparation') == 'full time' ? 'selected' : '' }}>Full Time</option>
+                            <option value="with job" {{ old('is_full_time_preparation') == 'with job' ? 'selected' : '' }}>With Job</option>
                         </select>
                         @error('is_full_time_preparation')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
@@ -123,9 +123,10 @@
                             class="form-control @error('work_schedule') is-invalid @enderror" 
                             name="work_schedule" id="work_schedule" required>
                             <option value="" disabled selected>Select your work schedule</option>
-                            <option value="part-time" {{ old('work_schedule') == 'part-time' ? 'selected' : '' }}>Part-Time</option>
-                            <option value="full-time" {{ old('work_schedule') == 'full-time' ? 'selected' : '' }}>Full-Time</option>
-                            <option value="flexible" {{ old('work_schedule') == 'flexible' ? 'selected' : '' }}>Flexible</option>
+                            <option value="Part Time" {{ old('work_schedule') == 'Part Time' ? 'selected' : '' }}>Part Time</option>
+                            <option value="Full Time" {{ old('work_schedule') == 'Full Time' ? 'selected' : '' }}>Full Time</option>
+                            <option value="Flexible" {{ old('work_schedule') == 'Flexible' ? 'selected' : '' }}>Flexible</option>
+                            <option value="Not Applicable" {{ old('work_schedule') == 'Not Applicable' ? 'selected' : '' }}>Not Applicable</option>
                         </select>
                         @error('work_schedule')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -142,7 +143,14 @@
                     </div>
 
                 </div>
-                <button type="submit" class="btn btn-primary">Next</button>
+
+                <!-- Submit Button -->
+                <div class="col-12">
+                    <button type="submit" id="submitButton" class="btn btn-primary mt-3">
+                        <span id="spinner"></span>
+                        <span id="submitText">Save and Continue</span>
+                    </button>
+                </div>
             </form>
         </div>
     </div>

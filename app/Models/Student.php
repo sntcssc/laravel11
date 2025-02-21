@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 
 use App\Models\TestSeries\StudentDetail;
-use App\Models\TestSeries\preparationDetail;
+use App\Models\TestSeries\PreparationDetail;
 use App\Models\TestSeries\SourcesUsed;
 use App\Models\TestSeries\CsatPreparation;
 use App\Models\TestSeries\AdditionalPreparation;

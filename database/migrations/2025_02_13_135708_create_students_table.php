@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('unique_id')->nullable(); // StudentID
             $table->string('batch_id')->nullable();
             $table->string('program_id')->nullable();
+            $table->string('section_id')->nullable();
             $table->date('admission_date')->nullable();
             $table->string('first_name')->nullable();
             $table->string('last_name')->nullable();

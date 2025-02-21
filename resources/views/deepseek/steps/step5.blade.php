@@ -7,7 +7,7 @@
     <div class="card shadow">
         <div class="card-header bg-primary text-white">Step 5: CSAT Preparation</div>
         <div class="card-body">
-            <form method="POST" action="{{ route('form.step', ['step' => 5]) }}">
+            <form method="POST" id="stepForm" action="{{ route('form.step', ['step' => 5]) }}">
                 @csrf
                 <div class="row g-3">
                     <div class="col-md-6">
@@ -64,7 +64,13 @@
                         @error('practicing_csat_every_day')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
 
-                    <button type="submit" class="btn btn-primary mt-3">Next</button>
+                    <!-- Submit Button -->
+                    <div class="col-12">
+                        <button type="submit" id="submitButton" class="btn btn-primary mt-3">
+                            <span id="spinner"></span>
+                            <span id="submitText">Save and Continue</span>
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>

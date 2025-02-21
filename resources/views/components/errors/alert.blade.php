@@ -1,5 +1,5 @@
 <!-- Updated component with customization options -->
-@props(['title' => 'Validation Errors'])
+@props(['title' => 'Something went wrong!!'])
 
 @if ($errors->any())
 <div {{ $attributes->merge(['class' => 'alert alert-danger alert-dismissible fade show']) }} role="alert">

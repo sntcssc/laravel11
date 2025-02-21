@@ -1,0 +1,157 @@
+Prompt: "how can i do it when click on download pdf button then it should show spinner with processing... text:
+
+<div class="mt-4">
+    <a href="{{ route('form.download-pdf') }}" class="btn btn-primary btn-md">
+        <i class="bi bi-download"></i> Download Application PDF
+    </a>
+</div>
+"
+
+ChatGPT Response:
+
+To show a spinner and the "Processing..." text when the user clicks the **Download PDF** button, you can use **JavaScript** to intercept the button click event, display the spinner, and then proceed with the download request.
+
+Here's how you can do it:
+
+### Solution:
+
+1. **Add a Spinner and Processing Text**: 
+   You'll need to add the spinner and text inside the button and show it when the button is clicked.
+   
+2. **Interception of the Button Click**: 
+   You'll intercept the click event, show the spinner, and then use `window.location` or `window.open` to initiate the PDF download.
+
+### Example Implementation:
+
+#### Blade View (With Spinner and "Processing..." Text)
+
+```blade
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download PDF with Spinner</title>
+
+    <style>
+        /* Style for the spinner */
+        #spinner {
+            display: none;
+            border: 3px solid transparent;
+            border-top: 3px solid #ffffff;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        /* Keyframes for spinner animation */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Button in processing state */
+        .processing {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mt-4">
+        <a href="#" id="downloadButton" class="btn btn-primary btn-md">
+            <i class="bi bi-download"></i> 
+            <span id="submitText">Download Application PDF</span>
+            <span id="spinner"></span>
+        </a>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const downloadButton = document.getElementById('downloadButton');
+            const spinner = document.getElementById('spinner');
+            const submitText = document.getElementById('submitText');
+
+            downloadButton.addEventListener('click', function (e) {
+                e.preventDefault(); // Prevent the default link action
+
+                // Show the spinner and change the text
+                spinner.style.display = 'inline-block'; // Show spinner
+                submitText.textContent = 'Processing...'; // Change text
+
+                // Disable the button (to prevent multiple clicks)
+                downloadButton.classList.add('processing');
+
+                // Simulate the download process (e.g., after 2 seconds)
+                setTimeout(function () {
+                    // Trigger the actual PDF download
+                    window.location.href = "{{ route('form.download-pdf') }}";
+
+                    // After the download has been triggered, reset the button (optional)
+                    // Reset button to initial state
+                    spinner.style.display = 'none';
+                    submitText.textContent = 'Download Application PDF';
+                    downloadButton.classList.remove('processing');
+                }, 2000); // You can adjust the delay as needed (or remove it)
+            });
+        });
+    </script>
+
+</body>
+</html>
+```
+
+### How It Works:
+
+1. **HTML Structure**:
+   - The download button is wrapped in an anchor tag `<a>`. Inside the anchor tag, we have:
+     - The **text** "Download Application PDF" (`<span id="submitText">`).
+     - The **spinner** (`<span id="spinner">`) which is initially hidden.
+
+2. **CSS**:
+   - The spinner is a circular element styled with `@keyframes` to rotate.
+   - The spinner is hidden by default (`display: none;`), and when the button is clicked, it is shown by changing its display to `inline-block`.
+
+3. **JavaScript**:
+   - **Click Event**: When the user clicks the download button, we prevent the default behavior of the anchor tag (`e.preventDefault()`), and show the spinner and change the text to "Processing...".
+   - **Simulate Delay**: We simulate a small delay of 2 seconds (which you can adjust or remove). This is where you could also handle any form submission or processing before triggering the actual download.
+   - **Trigger PDF Download**: After the delay, we use `window.location.href` to initiate the PDF download by redirecting to the route `{{ route('form.download-pdf') }}`. This triggers the controller action that serves the PDF.
+
+4. **Disable Multiple Clicks**: The button is disabled during the "Processing" state by adding the `processing` class, which changes the background color and disables further clicks.
+
+### Controller Handling (For Download PDF Route)
+
+In your **controller**, you would have something like this:
+
+```php
+use Illuminate\Support\Facades\Response;
+
+class FormController extends Controller
+{
+    public function downloadPdf()
+    {
+        // Path to the PDF file you want to serve
+        $filePath = storage_path('app/public/pdfs/application.pdf');
+
+        // Return the file as a download
+        return response()->download($filePath);
+    }
+}
+```
+
+### Route for PDF Download:
+
+Ensure that your route for downloading the PDF is defined in `web.php`:
+
+```php
+Route::get('/download-pdf', [FormController::class, 'downloadPdf'])->name('form.download-pdf');
+```
+
+### Conclusion:
+
+This solution allows you to show a spinner with the "Processing..." text when the user clicks the **Download PDF** button. The download will proceed after a short simulated delay, and the button will be reset afterward. 
+
+Let me know if you need more help!

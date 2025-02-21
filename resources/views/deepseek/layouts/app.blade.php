@@ -118,6 +118,30 @@
                 padding: 2rem 0;
             }
         }
+
+
+        /* Style for the spinner */
+        #spinner {
+            display: none;
+            border: 3px solid transparent;
+            border-top: 3px solid #ffffff;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Keyframes for spinner animation */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Button in processing state */
+        .processing {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
     </style>
     @stack('styles')
 </head>
@@ -156,6 +180,7 @@
     <!-- Main Content -->
     <main class="main-content flex-grow-1">
         <div class="container">
+            <x-errors.alert />
             @yield('content')
         </div>
     </main>
@@ -210,6 +235,35 @@
             const windowHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
             const scrolled = (window.scrollY / windowHeight) * 100;
             scrollProgress.style.width = scrolled + '%';
+        });
+    </script>
+
+
+<!-- For implementation of the submit button with a spinner and "Processing" text using only JavaScript  -->
+    <script>
+        // Wait until the DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get the form and the button
+            const form = document.getElementById('stepForm');
+            const submitButton = document.getElementById('submitButton');
+            const spinner = document.getElementById('spinner');
+            const submitText = document.getElementById('submitText');
+
+            // Add event listener for form submit
+            form.addEventListener('submit', function(e) {
+                e.preventDefault(); // Prevent normal form submission
+
+                // Change button to "processing" state
+                submitButton.classList.add('processing');
+                submitText.textContent = 'Processing...'; // Change text
+                spinner.style.display = 'inline-block'; // Show the spinner
+
+                // Simulate form submission (Replace with actual form submission)
+                setTimeout(function() {
+                    // Normally, here the form will be submitted after processing
+                    form.submit();
+                }, 2000); // Simulated processing time of 2 seconds
+            });
         });
     </script>
     @stack('scripts')

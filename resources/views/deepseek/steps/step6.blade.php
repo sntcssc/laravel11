@@ -7,7 +7,7 @@
     <div class="card shadow">
         <div class="card-header bg-primary text-white">Step 6: Additional Preparation Details</div>
         <div class="card-body">
-            <form method="POST" action="{{ route('form.step', ['step' => 6]) }}">
+            <form method="POST" id="stepForm" action="{{ route('form.step', ['step' => 6]) }}">
                 @csrf
                 <div class="row g-3">
                     <!-- YouTube Channels Followed -->
@@ -83,10 +83,10 @@
                     </div>
 
                     <!-- Daily Study Hours -->
-                    <div class="col-12">
+                    <div class="col-12 d-none">
                         <label class="form-label">How many hours do you study daily?</label>
                         <input type="number" class="form-control @error('daily_study_hours') is-invalid @enderror"
-                               name="daily_study_hours" value="{{ old('daily_study_hours') }}" min="1">
+                               name="daily_study_hours" value="{{ old('daily_study_hours', '1') }}" min="1">
                         @error('daily_study_hours')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
 
@@ -99,8 +99,13 @@
                     </div>
                     
                 </div>
-                <div class="mt-3">
-                    <button type="submit" class="btn btn-primary">Save and Continue</button>
+
+                <!-- Submit Button -->
+                <div class="col-12">
+                    <button type="submit" id="submitButton" class="btn btn-primary mt-3">
+                        <span id="spinner"></span>
+                        <span id="submitText">Save and Continue</span>
+                    </button>
                 </div>
             </form>
         </div>
