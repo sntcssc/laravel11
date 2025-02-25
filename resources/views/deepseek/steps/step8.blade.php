@@ -129,8 +129,8 @@
                         <select class="form-select @error('belief_in_clearing_prelims_this_year') is-invalid @enderror" 
                                 name="belief_in_clearing_prelims_this_year" required>
                             <option value="">Select an option</option>
-                            <option value="yes" {{ old('belief_in_clearing_prelims_this_year') == 'yes' ? 'selected' : '' }}>High Confidence</option>
-                            <option value="no" {{ old('belief_in_clearing_prelims_this_year') == 'no' ? 'selected' : '' }}>Need Improvement</option>
+                            <option value="High Confidence" {{ old('belief_in_clearing_prelims_this_year') == 'High Confidence' ? 'selected' : '' }}>High Confidence</option>
+                            <option value="Need Improvement" {{ old('belief_in_clearing_prelims_this_year') == 'Need Improvement' ? 'selected' : '' }}>Need Improvement</option>
                         </select>
                         @error('belief_in_clearing_prelims_this_year')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>

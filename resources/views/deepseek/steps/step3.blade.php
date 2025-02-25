@@ -58,6 +58,7 @@
                             <option value="Political Science and International Relations" {{ old('optional_subject') == 'Political Science and International Relations' ? 'selected' : '' }}>Political Science and International Relations</option>
                             <option value="Psychology" {{ old('optional_subject') == 'Psychology' ? 'selected' : '' }}>Psychology</option>
                             <option value="Public Administration" {{ old('optional_subject') == 'Public Administration' ? 'selected' : '' }}>Public Administration</option>
+                            <option value="Sanskrit" {{ old('optional_subject') == 'Sanskrit' ? 'selected' : '' }}>Sanskrit</option>
                             <option value="Sociology" {{ old('optional_subject') == 'Sociology' ? 'selected' : '' }}>Sociology</option>
                             <option value="Statistics" {{ old('optional_subject') == 'Statistics' ? 'selected' : '' }}>Statistics</option>
                             <option value="Urdu" {{ old('optional_subject') == 'Urdu' ? 'selected' : '' }}>Urdu</option>
@@ -81,7 +82,7 @@
                     <div class="col-md-6">
                         <label class="form-label">Have you taken coaching? </label>
                         <select class="form-select @error('has_coaching') is-invalid @enderror" 
-                                name="has_coaching" required>
+                                name="has_coaching" id="has_coaching" required>
                             <option value="">Select an option</option>
                             <option value="yes" {{ old('has_coaching') == 'yes' ? 'selected' : '' }}>Yes</option>
                             <option value="no" {{ old('has_coaching') == 'no' ? 'selected' : '' }}>No</option>
@@ -93,7 +94,7 @@
                     <div class="col-md-6">
                         <label class="form-label">If yes, from which institute</label>
                         <input type="text" class="form-control @error('coaching_institute') is-invalid @enderror" 
-                               name="coaching_institute" value="{{ old('coaching_institute') }}">
+                               name="coaching_institute" value="{{ old('coaching_institute') }}" id="coaching_institute">
                         @error('coaching_institute')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
 
@@ -101,7 +102,7 @@
                     <div class="col-md-6">
                         <label class="form-label">in which year (Coaching Year)</label>
                         <input type="number" class="form-control @error('coaching_year') is-invalid @enderror" 
-                               name="coaching_year" value="{{ old('coaching_year') }}">
+                               name="coaching_year" value="{{ old('coaching_year') }}" id="coaching_year">
                         @error('coaching_year')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
 
@@ -117,7 +118,7 @@
                     <div class="col-md-6">
                         <label class="form-label">Have you cleared the Prelims?</label>
                         <select class="form-select @error('cleared_prelims') is-invalid @enderror" 
-                                name="cleared_prelims" required>
+                                name="cleared_prelims" required id="cleared_prelims">
                             <option value="">Select an option</option>
                             <option value="yes" {{ old('cleared_prelims') == 'yes' ? 'selected' : '' }}>Yes</option>
                             <option value="no" {{ old('cleared_prelims') == 'no' ? 'selected' : '' }}>No</option>
@@ -129,7 +130,7 @@
                     <div class="col-md-6">
                         <label class="form-label">If yes, in which year(s)?</label>
                         <input type="number" class="form-control @error('cleared_prelims_year') is-invalid @enderror" 
-                               name="cleared_prelims_year" value="{{ old('cleared_prelims_year') }}">
+                               name="cleared_prelims_year" value="{{ old('cleared_prelims_year') }}" id="cleared_prelims_year">
                         @error('cleared_prelims_year')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
 
@@ -137,7 +138,7 @@
                     <div class="col-md-6">
                         <label class="form-label">Have you cleared the Mains?</label>
                         <select class="form-select @error('cleared_mains') is-invalid @enderror" 
-                                name="cleared_mains" required>
+                                name="cleared_mains" id="cleared_mains" required>
                             <option value="">Select an option</option>
                             <option value="yes" {{ old('cleared_mains') == 'yes' ? 'selected' : '' }}>Yes</option>
                             <option value="no" {{ old('cleared_mains') == 'no' ? 'selected' : '' }}>No</option>
@@ -149,7 +150,7 @@
                     <div class="col-md-6">
                         <label class="form-label">If yes, in which year(s)?</label>
                         <input type="number" class="form-control @error('cleared_mains_year') is-invalid @enderror" 
-                               name="cleared_mains_year" value="{{ old('cleared_mains_year') }}">
+                               name="cleared_mains_year" value="{{ old('cleared_mains_year') }}" id="cleared_mains_year">
                         @error('cleared_mains_year')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
 
@@ -300,4 +301,63 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+
+document.addEventListener('DOMContentLoaded', function () {
+    const hasCoaching = document.getElementById('has_coaching');
+    const coachingInstitute = document.getElementById('coaching_institute');
+    const coachingYear = document.getElementById('coaching_year');
+
+    // Function to toggle the input field based on selection
+    function toggleCoachingInstitute() {
+        if (hasCoaching.value === 'no') {
+            // coachingInstitute.disabled = true;
+            coachingInstitute.readOnly = true;  // Make the input readonly
+            coachingYear.readOnly = true;
+        } else {
+            // coachingInstitute.disabled = false;
+            coachingInstitute.readOnly = false;  // Allow editing the input
+            coachingYear.readOnly = false;
+        }
+    }
+
+    
+    const clearedPrelims = document.getElementById('cleared_prelims');
+    const clearedYear = document.getElementById('cleared_prelims_year');
+
+    function toggleClearedPrelims() {
+        if (clearedPrelims.value === 'no') {
+            clearedYear.readOnly = true;
+        } else {
+            clearedYear.readOnly = false;
+        }
+    }
+
+    const clearedMains = document.getElementById('cleared_mains');
+    const clearedMainsYear = document.getElementById('cleared_mains_year');
+
+    function toggleClearedMains() {
+        if (clearedMains.value === 'no') {
+            clearedMainsYear.readOnly = true;
+        } else {
+            clearedMainsYear.readOnly = false;
+        }
+    }
+
+    // Initial call to set the input state based on the current selection
+    toggleCoachingInstitute();
+    toggleClearedPrelims();
+    toggleClearedMains();
+
+    // Event listener to call the function when the dropdown value changes
+    hasCoaching.addEventListener('change', toggleCoachingInstitute);
+    clearedPrelims.addEventListener('change', toggleClearedPrelims);
+    clearedMains.addEventListener('change', toggleClearedMains);
+});
+
+</script>
+
+@endpush
 @endsection

@@ -7,6 +7,9 @@
     <title>Satyendra Nath Tagore Civil Services Study Centre</title>
     <link rel="icon" href="https://csscwb.in/assets/front-end/images/others/favicon.ico" type="image/x-icon">
     <link rel="shortcut icon" type="image/x-icon" href="https://csscwb.in/assets/front-end/images/others/favicon.ico">
+    <meta name="Description" content="Satyendra Nath Tagore Civil Services Study Centre is ready to serve as a beacon for UPSC aspirants and provide guidance and mentorship to the leaders of tomorrow">
+    <meta name="author" content="Subhankar Basak">
+    <meta name="keywords" content="sntcssc, csscwb, satyendra nath tagore civil services study centre">
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -17,7 +20,8 @@
     <!-- Custom CSS -->
     <style>
         :root {
-            --primary-color: #2c3e50;
+            /* --primary-color: #2c3e50; */
+            --primary-color: #0d6efd;
             --secondary-color: #34495e;
             --header-gradient: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
             --footer-gradient: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
@@ -144,6 +148,12 @@
             background-color: #6c757d;
             cursor: not-allowed;
         }
+
+    input[readonly] {
+    cursor: not-allowed;
+    }
+
+
     </style>
     @stack('styles')
 </head>
@@ -271,6 +281,6 @@
         });
     </script>
     @stack('scripts')
-    @yield('scripts');
+    @yield('scripts')
 </body>
 </html>

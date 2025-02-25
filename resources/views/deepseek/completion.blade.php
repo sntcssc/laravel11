@@ -1,4 +1,24 @@
 @extends('deepseek.layouts.app')
+@push('styles')
+<style>
+@keyframes blink {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.btn-outline-primary {
+  animation: blink 1.5s infinite; /* Adjust the duration for faster/slower blinking */
+}
+
+</style>
+@endpush
 
 @section('content')
 <div class="container">
@@ -46,8 +66,8 @@
             <!--  -->
 
             <div class="mt-4">
-                <a href="{{ route('student.verification') }}" class="btn btn-outline-primary">
-                    Start New Submission
+                <a href="https://chat.whatsapp.com/EZV5eiBLS9vFIGGotTAMID" target="_blank" class="btn btn-outline-primary bg-danger text-white">
+                    Join SFG WhatsApp Group
                 </a>
             </div>
 
@@ -82,7 +102,7 @@
                     // After the download has been triggered, reset the button (optional)
                     // Reset button to initial state
                     spinner.style.display = 'none';
-                    submitText.textContent = 'Download Application PDF';
+                    submitText.textContent = 'Download PDF';
                     downloadButton.classList.remove('processing');
                 }, 2000); // You can adjust the delay as needed (or remove it)
             });

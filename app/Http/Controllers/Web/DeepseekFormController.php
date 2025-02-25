@@ -207,7 +207,8 @@ class DeepseekFormController extends Controller
         // Clear all session data
         // $request->session()->flush();
 
-        return view('deepseek.verification');
+        // return view('deepseek.verification');
+        return view('deepseek.expired');
     }
 
     public function verifyStudent(Request $request)

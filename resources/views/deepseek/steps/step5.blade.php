@@ -12,7 +12,7 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label">Have you ever failed to qualify for CSAT in Prelims?</label>
-                        <select class="form-select @error('isever_failed_csat') is-invalid @enderror" name="isever_failed_csat" required>
+                        <select class="form-select @error('isever_failed_csat') is-invalid @enderror" name="isever_failed_csat" id="isever_failed_csat" required>
                             <option value="">Select an option</option>
                             <option value="yes" {{ old('isever_failed_csat') == 'yes' ? 'selected' : '' }}>Yes</option>
                             <option value="no" {{ old('isever_failed_csat') == 'no' ? 'selected' : '' }}>No</option>
@@ -23,7 +23,7 @@
                     <div class="col-md-6">
                         <label class="form-label">If yes, how many times?</label>
                         <input type="number" class="form-control @error('failed_csat_count') is-invalid @enderror" 
-                               name="failed_csat_count" required>
+                               name="failed_csat_count" id="failed_csat_count" required>
                         @error('failed_csat_count')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
 
@@ -76,4 +76,30 @@
         </div>
     </div>
 </div>
+@push('scripts')
+<script>
+
+document.addEventListener('DOMContentLoaded', function () {
+    const everFailedCsat = document.getElementById('isever_failed_csat');
+    const failedCount = document.getElementById('failed_csat_count');
+
+    // Function to toggle the input field based on selection
+    function toggleEverfailedCsat() {
+        if (everFailedCsat.value === 'no') {
+            failedCount.readOnly = true;
+        } else {
+            failedCount.readOnly = false;
+        }
+    }
+
+    // Initial call to set the input state based on the current selection
+    toggleEverfailedCsat();
+
+    // Event listener to call the function when the dropdown value changes
+    everFailedCsat.addEventListener('change', toggleEverfailedCsat);
+});
+
+</script>
+
+@endpush
 @endsection

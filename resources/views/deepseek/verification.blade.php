@@ -8,7 +8,7 @@
             <x-progress-bar :progress="0" />
             <h5 class="text-center pb-4">Information sheet Form for Special Focus Group (SFG) program</h5>
             
-            <form method="POST" action="{{ route('student.verify') }}">
+            <form method="POST" id="stepForm" action="{{ route('student.verify') }}">
                 @csrf
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
@@ -47,7 +47,13 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary">Verify Student</button>
+                <!-- Submit Button -->
+                <div class="col-12">
+                    <button type="submit" id="submitButton" class="btn btn-primary mt-3">
+                        <span id="spinner"></span>
+                        <span id="submitText">Verify Student</span>
+                    </button>
+                </div>
             </form>
         </div>
     </div>
