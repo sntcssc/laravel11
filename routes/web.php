@@ -25,7 +25,9 @@ use App\Http\Controllers\Form\StudentRegistrationController;
 use App\Http\Controllers\Web\StudentInfoController;
 use App\Http\Controllers\Web\DeepseekFormController;
 
-
+// Export as Excel
+use App\Exports\StudentsExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 
 
@@ -241,6 +243,12 @@ Route::post('/student/confirm-submission', [StudentInfoController::class, 'confi
 // Route::post('admin/students/{student}/enroll', [EnrollmentController::class, 'enroll'])->name('students.enroll');
 // Route::delete('admin/students/{student}/enrollment/{enrollment}', [EnrollmentController::class, 'withdraw'])->name('students.withdraw');
 
+
+
+// Export As EXcel
+Route::get('/export-students', function () {
+    return Excel::download(new StudentsExport, 'students.xlsx');
+});
 
 
 //Reoptimized class loader:

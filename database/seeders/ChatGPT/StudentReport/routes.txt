@@ -1,0 +1,9 @@
+use App\Http\Controllers\Admin\StudentReportController;
+
+    // Student Question Reports
+    Route::get('/student-reports', [StudentReportController::class, 'index'])->name('student-reports');
+    Route::post('/student-reports/questions', [StudentReportController::class, 'getQuestions'])->name('get-questions');
+    Route::post('/student-reports/answers', [StudentReportController::class, 'getAnswers'])->name('get-answers');
+    // Add this route
+    Route::get('/students/{id}/details', [StudentReportController::class, 'getStudentDetails'])
+        ->name('students.details');

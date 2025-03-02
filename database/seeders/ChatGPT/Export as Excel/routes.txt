@@ -1,0 +1,6 @@
+use App\Exports\StudentsExport;
+use Maatwebsite\Excel\Facades\Excel;
+
+Route::get('/export-students', function () {
+    return Excel::download(new StudentsExport, 'students.xlsx');
+});
